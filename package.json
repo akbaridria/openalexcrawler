@@ -1,0 +1,37 @@
+{
+  "name": "openalexcrawler",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "db:push": "drizzle-kit push",
+    "build": "tsc",
+    "start:main": "tsx workers/main-worker.ts",
+    "start:scrape": "tsx workers/scrape-worker.ts",
+    "start": "tsx main.ts",
+    "start:all": "concurrently \"yarn start:main\" \"yarn start:scrape\" \"yarn start\"",
+    "start:worker": "concurrently \"yarn start:main\" \"yarn start:scrape\"",
+    "export:csv": "tsx scripts/export-csv.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bullmq": "^5.41.0",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.39.3",
+    "ioredis": "^5.5.0",
+    "neverthrow": "^8.1.1",
+    "pg": "^8.13.3",
+    "ts-node": "^10.9.2",
+    "csv-writer": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "@types/pg": "^8.11.11",
+    "drizzle-kit": "^0.30.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "concurrently": "^8.2.2"
+  }
+}
