@@ -18,7 +18,7 @@ export const publications = pgTable("publications", {
   title: text("title"),
   publication_date: date("publication_date"),
   language: varchar("language", { length: 50 }),
-  published_in: varchar("published_in", { length: 255 }),
+  published_in: text("published_in"),
   is_open_access: boolean("is_open_access"),
   open_access_status: varchar("open_access_status", { length: 50 }),
   url: text("url"),

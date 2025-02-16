@@ -1,7 +1,6 @@
 import { db } from "../db";
 import { publications, authors, publicationAuthors } from "../db/schema";
-import { sql } from "drizzle-orm";
-import { eq } from "drizzle-orm";
+import { sql, like, eq } from "drizzle-orm";
 import { createObjectCsvWriter } from 'csv-writer';
 
 async function exportToCSV() {
@@ -21,6 +20,7 @@ async function exportToCSV() {
     .from(publications)
     .leftJoin(publicationAuthors, eq(publications.id, publicationAuthors.publication_id))
     .leftJoin(authors, eq(publicationAuthors.author_id, authors.id))
+    .where(like(publications.title, '%graph%'))
     .groupBy(publications.id)
     .limit(500);
 

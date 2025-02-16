@@ -11,7 +11,7 @@ import { ResponseTypes } from "../type";
 
 const processMainJob = async () => {
   // variables
-  const pageSize = 100;
+  const pageSize = 200;
   const cursor = await getCursor();
   const topicId = "topics.id:T12292"; // topic id for graph databases
   const selectedFields =
@@ -25,7 +25,7 @@ const processMainJob = async () => {
     async (data) => {
       if (data.results.length === 0 || !data.meta.next_cursor) {
         // No more data or no next cursor, remove the scheduler
-        const schedulers = await mainQueue.getJobSchedulers(0, 10, true);
+        const schedulers = await mainQueue.getJobSchedulers(0, 1_000, true);
         await Promise.all(
           schedulers.map((scheduler) =>
             mainQueue.removeJobScheduler(scheduler.name)

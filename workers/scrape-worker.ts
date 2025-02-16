@@ -18,13 +18,13 @@ const processScrapeJob = async (job: Job<Publication, any, any>) => {
       title: publication.title,
       publication_date: publication.publication_date,
       language: publication.language,
-      published_in: publication.primary_location?.source?.display_name,
+      published_in: publication?.primary_location?.source?.display_name,
       is_open_access: publication.open_access.is_oa,
       open_access_status: publication.open_access.oa_status,
       url:
         publication.open_access.oa_url ||
-        publication.primary_location.landing_page_url,
-      type: publication.primary_location?.source?.type || publication.type,
+        publication?.primary_location?.landing_page_url,
+      type: publication?.primary_location?.source?.type || publication.type,
     });
 
     // Insert authors and link to publication
@@ -37,7 +37,7 @@ const processScrapeJob = async (job: Job<Publication, any, any>) => {
         .insert(authors)
         .values({
           id: authorId,
-          display_name: author.display_name,
+          display_name: author?.display_name,
         })
         .onConflictDoNothing({ target: authors.id });
 
