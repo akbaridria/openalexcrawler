@@ -15,7 +15,7 @@ const processMainJob = async () => {
   const cursor = await getCursor();
   const topicId = "topics.id:T12292"; // topic id for graph databases
   const selectedFields =
-    "id,title,publication_date,language,primary_location,type,open_access,authorships";
+    "id,title,publication_date,language,primary_location,type,open_access,authorships,abstract_inverted_index";
   const url = `https://api.openalex.org/works?per_page=${pageSize}&filter=${topicId}&select=${selectedFields}&cursor=${cursor}`;
 
   // get the data

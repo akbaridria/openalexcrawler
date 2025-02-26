@@ -7,6 +7,7 @@ export interface Publication {
   type: string;
   open_access: OpenAccess;
   authorships: Authorship[];
+  abstract_inverted_index?: { [key: string] : any }
 }
 
 export interface PrimaryLocation {
