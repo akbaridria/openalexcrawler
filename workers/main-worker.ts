@@ -2,10 +2,10 @@ import { Worker } from "bullmq";
 import { getCursor, redisConnection, setCursor } from "../helper/redis";
 import {
   safeFetch,
-  crawlerQueue,
-  CRAWLER_QUEUE_NAME,
   MAIN_QUEUE_NAME,
   mainQueue,
+  paperQueue,
+  PAPER_QUEUE_NAME,
 } from "../helper/utils";
 import { ResponseTypes } from "../type";
 
@@ -13,7 +13,7 @@ const processMainJob = async () => {
   // variables
   const pageSize = 200;
   const cursor = await getCursor();
-  const topicId = "topics.id:T12292"; // topic id for graph databases
+  const topicId = "topics.id:T12292,type:article"; // topic id for graph theory and algorithm
   const selectedFields =
     "id,title,publication_date,language,primary_location,type,open_access,authorships,abstract_inverted_index";
   const url = `https://api.openalex.org/works?per_page=${pageSize}&filter=${topicId}&select=${selectedFields}&cursor=${cursor}`;
@@ -38,10 +38,10 @@ const processMainJob = async () => {
 
       // publish the data to the crawler queue in bulk
       const jobs = data.results.map((item) => ({
-        name: CRAWLER_QUEUE_NAME,
+        name: PAPER_QUEUE_NAME,
         data: item,
       }));
-      await crawlerQueue.addBulk(jobs);
+      await paperQueue.addBulk(jobs);
 
       // Update cursor for next iteration
       await setCursor(data.meta.next_cursor);

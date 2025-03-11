@@ -4,13 +4,19 @@
   "main": "index.js",
   "scripts": {
     "db:push": "drizzle-kit push",
+    "db:migrate": "drizzle-kit migrate",
     "build": "tsc",
     "start:main": "tsx workers/main-worker.ts",
-    "start:scrape": "tsx workers/scrape-worker.ts",
     "start": "tsx main.ts",
-    "start:all": "concurrently \"yarn start:main\" \"yarn start:scrape\" \"yarn start\"",
-    "start:worker": "concurrently \"yarn start:main\" \"yarn start:scrape\"",
-    "export:csv": "tsx scripts/export-csv.ts"
+    "start:all": "concurrently \"yarn start:main\" \"yarn start:paper\" \"yarn start:journal\" \"yarn start:author\" \"yarn start:publisher\" \"yarn start:paper\" \"yarn start:institution\" \"yarn start\"",
+    "start:worker": "concurrently \"yarn start:paper\" \"yarn start:journal\" \"yarn start:author\" \"yarn start:publisher\" \"yarn start:paper\" \"yarn start:institution\"",
+    "start:paper": "tsx workers/paper-worker.ts",
+    "start:journal": "tsx workers/journal-worker.ts",
+    "start:author": "tsx workers/author-worker.ts",
+    "start:publisher": "tsx workers/publisher-worker.ts",
+    "start:institution": "tsx workers/institution-worker.ts",
+    "export:csv": "tsx scripts/export-csv.ts",
+    "db:truncate-all": "tsx helper/truncate-all.ts"
   },
   "keywords": [],
   "author": "",
