@@ -99,12 +99,7 @@ const processScrapeJob = async (job: Job<Publication, any, any>) => {
   // Queue journal, publisher and authors for additional processing if needed
   journalQueue.add(JOURNAL_QUEUE_NAME, { id: journalId });
   publisherQueue.add(PUBLISHER_QUEUE_NAME, { id: publisherId });
-  authorQueue.addBulk(
-    publication.authorships.map((authorship) => ({
-      name: AUTHOR_QUEUE_NAME,
-      data: authorship.author,
-    }))
-  );
+  authorQueue.add(AUTHOR_QUEUE_NAME, { ids: publication.authorships.map((authorship) => cleanId(authorship.author.id)) });
 
   return { processed: true, skipped: false, reason: null };
 };

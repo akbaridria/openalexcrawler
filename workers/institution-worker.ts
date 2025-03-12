@@ -6,25 +6,45 @@ import { ResponseInstitution } from "../type";
 import { INSTITUTION_QUEUE_NAME, safeFetch } from "../helper/utils";
 import { eq } from "drizzle-orm";
 
-const processScrapeJob = async (job: Job<{ id: string, authorId: string }, any, any>) => {
-    const institutionId = job.data.id;
-    const url = `https://api.openalex.org/institutions/${institutionId}`;
-    const res = await safeFetch<ResponseInstitution>(url);
+const cleanId = (id: string) => id.replace("https://openalex.org/", "");
+
+const processScrapeJob = async (job: Job<{
+    ids: {
+        authorId: string;
+        institutions: string[];
+    }[]
+}, any, any>) => {
+    const institutionIds = job.data.ids.flatMap((authorInstitution) => authorInstitution.institutions);
+    const uniqueInstitutionIds = Array.from(new Set(institutionIds));
+    const filterInstitutionIds = `?filter=id:${uniqueInstitutionIds.join("|")}`;
+
+    const url = `https://api.openalex.org/institutions${filterInstitutionIds}`;
+    const res = await safeFetch<{ results: ResponseInstitution[] }>(url);
 
     res.match(
         async (data) => {
-            const cleanedName = data.display_name.replace(/\s*\(.*?\)\s*/g, "").trim();
-            await db.update(institutions).set({
-                name: cleanedName,
-                location: data.country_code,
-                website: data.homepage_url,
-            }).where(eq(institutions.id, institutionId));
+            try {
+                await db.insert(institutions).values(data.results.map((institution) => ({
+                    id: cleanId(institution.id),
+                    name: institution.display_name.replace(/\s*\(.*?\)\s*/g, "").trim(),
+                    location: institution.country_code,
+                    website: institution.homepage_url,
+                    cover: institution.image_url,
+                }))).onConflictDoNothing();
 
-            await db.insert(authorInstitutions).values({
-                id: `${job.data.authorId}-${institutionId}`,
-                author_id: job.data.authorId,
-                institution_id: institutionId,
-            }).onConflictDoNothing();
+                const payloadAuthorinstitutions = job.data.ids.flatMap((authorInstitution) => {
+                    return authorInstitution.institutions.map((institutionId) => ({
+                        id: `${authorInstitution.authorId}-${institutionId}`,
+                        author_id: authorInstitution.authorId,
+                        institution_id: institutionId,
+                    }))
+                })
+
+                await db.insert(authorInstitutions).values(payloadAuthorinstitutions).onConflictDoNothing();
+
+            } catch (error) {
+                return { processed: false, skipped: true, reason: error };
+            }
 
         },
         (error) => {
@@ -37,6 +57,7 @@ const processScrapeJob = async (job: Job<{ id: string, authorId: string }, any, 
 
 const worker = new Worker(INSTITUTION_QUEUE_NAME, processScrapeJob, {
     connection: redisConnection,
+    concurrency: 10,
 });
 
 worker.on("completed", (job, result) => {

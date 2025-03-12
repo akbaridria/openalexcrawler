@@ -27,6 +27,7 @@ const processScrapeJob = async (job: Job<{ id: string }, any, any>) => {
 
 const worker = new Worker(JOURNAL_QUEUE_NAME, processScrapeJob, {
     connection: redisConnection,
+    concurrency: 10,
 });
 
 worker.on("completed", (job, result) => {
